@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>管理员仪表板</h2>
+        <!-- 添加客户表单 -->
+        <div class="mt-4">
+            <h4>添加客户</h4>
+            <form id="add-customer-form">
+                <div class="form-group">
+                    <label for="customerName">客户姓名</label>
+                    <input type="text" class="form-control" id="customerName" required>
+                </div>
+                <div class="form-group">
+                    <label for="customerContact">联系方式</label>
+                    <input type="text" class="form-control" id="customerContact" required>
+                </div>
+                <!-- 其他字段... -->
+                <button type="submit" class="btn btn-primary">提交</button>
+            </form>
+        </div>
+        <!-- 添加服务表单 -->
+        <div class="mt-4">
+            <h4>添加服务</h4>
+            <form id="add-service-form">
+                <!-- 表单字段... -->
+                <button type="submit" class="btn btn-primary">添加服务</button>
+            </form>
+        </div>
+        <!-- 添加零件表单 -->
+        <div class="mt-4">
+            <h4>添加零件</h4>
+            <form id="add-part-form">
+                <!-- 表单字段... -->
+                <button type="submit" class="btn btn-primary">添加零件</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+</body>
+</html>

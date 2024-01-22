@@ -29,7 +29,6 @@ def home():
 
 @app.route("/currentjobs")
 def currentjobs():
-    # assert request.json, '参数不为空'
     connection = getCursor()
     connection.execute("SELECT job_id,customer,job_date FROM job where completed=0;")
     jobList = connection.fetchall()

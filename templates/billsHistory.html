@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Billing History & Overdue Bills</h3>
+
+{% for customer_data in history_data %}
+<!-- Customer details -->
+<div class="customer-details">
+    <h4>Customer: {{ customer_data.family_name }} {{ customer_data.first_name }}</h4>
+    {% if customer_data.phone %}
+    <p>Phone: {{ customer_data.phone }}</p>
+    {% endif %}
+    {% if customer_data.email %}
+    <p>Email: {{ customer_data.email }}</p>
+    {% endif %}
+</div>
+
+
+<!-- Bill details -->
+<div class="bill-details">
+    <h3>Bills</h3>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Total Cost</th>
+            <th>Status</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for bill in customer_data.bills %}
+        <tr {% if bill.overdue %}class="table-danger" {% endif %}>
+            <td>{{ bill.job_date }}</td>
+            <td>{{ bill.total_cost }}</td>
+            <td>{% if bill.overdue %}<span class="badge bg-danger">Overdue</span>{% else %}<span
+                    class="badge bg-success">Paid</span>{% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endfor %}
+{% endblock %}

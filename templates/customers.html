@@ -4,49 +4,49 @@
 
 <!-- Add Customer Button -->
 <button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
-  Add Customer
+    Add Customer
 </button>
 <!-- Modal -->
 <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="addCustomerModalLabel">Add Customer</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Customer Form -->
-        <form id="addCustomerForm" class="needs-validation" novalidate action="/addCustomer" method="POST">
-          <div class="mb-3">
-            <label for="firstName" class="form-label">First Name</label>
-            <input type="text" class="form-control" id="firstName" name="firstName" required>
-          </div>
-          <div class="mb-3">
-            <label for="familyName" class="form-label">Family Name</label>
-            <input type="text" class="form-control" id="familyName" name="familyName" required>
-            <div class="invalid-feedback">
-              Please enter the family name.
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCustomerModalLabel">Add Customer</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-          </div>
-          <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email" required>
-            <div class="invalid-feedback">
-              Please enter a valid email address.
+            <div class="modal-body">
+                <!-- Customer Form -->
+                <form id="addCustomerForm" class="needs-validation" novalidate action="/addCustomer" method="POST">
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="familyName" class="form-label">Family Name</label>
+                        <input type="text" class="form-control" id="familyName" name="familyName" required>
+                        <div class="invalid-feedback">
+                            Please enter the family name.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                        <div class="invalid-feedback">
+                            Please enter a valid email address.
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="phone" class="form-label">Phone</label>
+                        <input type="tel" class="form-control" id="phone" name="phone" required>
+                        <div class="invalid-feedback">
+                            Please enter a phone number.
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">submit</button>
+                </form>
             </div>
-          </div>
-          <div class="mb-3">
-            <label for="phone" class="form-label">Phone</label>
-            <input type="tel" class="form-control" id="phone" name="phone" required>
-            <div class="invalid-feedback">
-              Please enter a phone number.
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary">submit</button>
-        </form>
-      </div>
+        </div>
     </div>
-  </div>
 </div>
 <form id="searchForm" class="needs-validation" novalidate>
     <div class="input-group mb-3">
@@ -61,41 +61,26 @@
     <table class="table">
         <thead>
         <tr>
+            <th scope="col">Customer Id</th>
+
             <th scope="col">First Name</th>
             <th scope="col">Family Name</th>
+            <th scope="col">Email</th>
             <th scope="col">Phone</th>
         </tr>
         </thead>
         <tbody>
         {% for customer in customers %}
         <tr>
+            <td>{{ customer.customer_id }}</td>
             <td>{{ customer.first_name }}</td>
             <td>{{ customer.family_name }}</td>
+            <td>{{ customer.email }}</td>
             <td>{{ customer.phone }}</td>
         </tr>
         {% endfor %}
         </tbody>
     </table>
 </div>
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const searchForm = document.getElementById('searchForm');
-    const searchInput = document.getElementById('searchInput');
 
-    searchForm.addEventListener('submit', function (event) {
-      event.preventDefault();
-      event.stopPropagation();
-
-      if (searchForm.checkValidity()) {
-        const searchTerm = searchInput.value.trim();
-        const url = `/customers?name=${encodeURIComponent(searchTerm)}`;
-
-        // reload page
-        window.location.href = url;
-      }
-      searchForm.classList.add('was-validated');
-    });
-  });
-
-</script>
 {% endblock %}

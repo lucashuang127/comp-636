@@ -1,0 +1,63 @@
+<!-- unpaid.html -->
+{% extends "base.html" %}
+{% block content %}
+<h2>Unpaid bills & Pay Bills</h2>
+
+<!-- Search form -->
+<form action="/unpaid_jobs" method="GET" class="mb-3">
+    <div class="input-group">
+        <input type="text" class="form-control" placeholder="Search by customer name" name="customer_name">
+        <button class="btn btn-outline-secondary" type="submit">Search</button>
+    </div>
+</form>
+
+<!-- Table to display unpaid orders -->
+<table class="table">
+    <thead>
+    <tr>
+        <th>First Name</th>
+        <th>Family Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Total Cost</th>
+        <th>Job Date</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for order in unpaid_jobs %}
+    <tr>
+        <td>{{ order.first_name }}</td>
+        <td>{{ order.family_name }}</td>
+        <td>{{ order.phone }}</td>
+        <td>{{ order.email }}</td>
+        <td>{{ order.total_cost }}</td>
+        <td>{{ order.job_date }}</td>
+        <td>
+            <!-- Payment button with form submission -->
+            <form action="/pay_job" method="POST">
+                <input type="hidden" name="job_id" value="{{ order.job_id }}">
+                <button class="btn btn-primary" type="submit">Pay</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- Pagination -->
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        {% if page > 1 %}
+        <li class="page-item"><a class="page-link" href="?page={{ page - 1 }}">Previous</a></li>
+        {% endif %}
+        {% for num in range(1, total_pages + 1) %}
+        <li class="page-item {% if num == page %}active{% endif %}"><a class="page-link" href="?page={{ num }}">{{ num
+            }}</a></li>
+        {% endfor %}
+        {% if page < total_pages %}
+        <li class="page-item"><a class="page-link" href="?page={{ page + 1 }}">Next</a></li>
+        {% endif %}
+    </ul>
+</nav>
+{% endblock %}

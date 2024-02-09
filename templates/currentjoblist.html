@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base2.html" %}
 {% block content %}
 
 <h2>Curent Job List</h2>
@@ -10,7 +10,6 @@
         <th>Job ID</th>
         <th>First Name</th>
         <th>Family Name</th>
-        <th>Customer Id</th>
         <th>Date</th>
         <th>Service Name</th>
         <th>Part Name</th>
@@ -23,12 +22,16 @@
         <td>{{ job.job_id }}</td>
         <td>{{ job.first_name }}</td>
         <td>{{ job.family_name }}</td>
-        <td>{{ job.customer_id }}</td>
         <td>{{ job.job_date }}</td>
         <td>{{ job.service_name}}</td>
         <td>{{ job.part_name}}</td>
-<!--        <td>{{ job.completed }}</td>-->
+        <!--        <td>{{ job.completed }}</td>-->
         <td>
+            <!-- Complete job button -->
+            <form action="/complete_job" method="POST" style="display: inline;">
+                <input type="hidden" name="job_id" value="{{ job.job_id }}">
+                <button type="submit" class="btn btn-success">Complete</button>
+            </form>
             <!-- Edit button trigger modal -->
             <button type="button" class="btn btn-primary" data-bs-toggle="modal"
                     data-bs-target="#editJobModal{{ job.job_id }}">

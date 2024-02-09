@@ -131,9 +131,6 @@ def get_part_list():
     return result
 
 
-
-
-
 @app.post("/addCustomer")
 def add_customer():
     data = request.form
@@ -215,7 +212,7 @@ def get_customers():
 
     connect = getCursor()
     # build sql
-    sql = "SELECT * FROM customer"
+    sql = "SELECT customer_id,first_name,family_name,email,phone FROM customer"
     orderBy = " order by family_name,first_name"
     if name:
         sql += " WHERE first_name LIKE %s OR family_name LIKE %s"
@@ -230,7 +227,8 @@ def get_customers():
     customers = connect.fetchall()
 
     # format results
-    result = [{'id': row[0], 'first_name': row[1], 'family_name': row[2]} for row in customers]
+    result = [{'customer_id': row[0], 'first_name': row[1], 'family_name': row[2], 'email': row[3], 'phone': row[4]} for
+              row in customers]
     return render_template("customers.html", customers=result, services=get_service_list())
 
 
@@ -275,7 +273,7 @@ def unpaid_jobs():
 
     # Build the SQL query statement to get unpaid jobs
     unpaid_jobs_query = '''
-        SELECT j.job_id, j.customer, j.job_date, j.total_cost, c.phone, c.first_name, c.family_name
+        SELECT j.job_id, j.customer, j.job_date, j.total_cost, c.phone, c.first_name, c.family_name ,c.email
         FROM job j
         JOIN customer c ON j.customer = c.customer_id
         WHERE j.paid = 0
@@ -292,8 +290,9 @@ def unpaid_jobs():
     unpaid_jobs = connect.fetchall()
 
     # Construct the JSON response for unpaid jobs
-    unpaid_jobs_list = [{'id': row[0], 'customer': row[1], 'job_date': row[2], 'total_cost': row[3], 'phone': row[4],
-                         'first_name': row[5], 'family_name': row[6]} for row in unpaid_jobs]
+    unpaid_jobs_list = [
+        {'job_id': row[0], 'customer': row[1], 'job_date': row[2], 'total_cost': row[3], 'phone': row[4],
+         'first_name': row[5], 'family_name': row[6], 'email': row[7]} for row in unpaid_jobs]
 
     # Build the SQL query statement to get the total count of unpaid jobs
     total_count_query = "SELECT COUNT(*) FROM job j JOIN customer c ON j.customer = c.customer_id WHERE j.paid = 0"
@@ -308,14 +307,14 @@ def unpaid_jobs():
 
     # Calculate the total number of pages
     total_pages = math.ceil(total_count / page_size)
-
-    return jsonify({'unpaid_jobs': unpaid_jobs_list, 'total_count': total_count, 'total_pages': total_pages}), 200
+    return render_template("unpaidBills.html", unpaid_jobs=unpaid_jobs_list, total_count=total_count,
+                           total_pages=total_pages, page=page)
 
 
 @app.route('/pay_job', methods=['POST'])
 def pay_job():
     # Get job_id from the request parameters
-    job_id = request.json.get('job_id')
+    job_id = request.form.get('job_id')
 
     connect = getCursor()
     # Validate job_id
@@ -335,7 +334,7 @@ def pay_job():
     # Execute the update query
     connect.execute(update_query)
 
-    return jsonify({'message': 'Job payment successful'}), 200
+    return redirect(url_for('unpaid_jobs'))
 
 
 @app.route('/billing_history', methods=['GET'])
@@ -346,6 +345,7 @@ def billing_history():
         c.family_name,
         c.first_name,
         c.phone,
+        c.email,
         j.job_date,
         j.total_cost
     FROM 
@@ -365,24 +365,68 @@ def billing_history():
     # Group billing history by customer
     grouped_billing_history = {}
     for row in billing_history:
-        customer_key = (row[0], row[1], row[2])  # Using family_name, first_name, phone as key
+        customer_key = (row[0], row[1], row[2], row[3])  # Using family_name, first_name, phone ,email as key
         if customer_key not in grouped_billing_history:
             grouped_billing_history[customer_key] = []
-        grouped_billing_history[customer_key].append({'job_date': row[3], 'total_cost': row[4]})
+            # Calculate overdue status
+        job_date = datetime.strptime(str(row[4]), '%Y-%m-%d')
+        days_since_job = (datetime.now() - job_date).days
+        overdue = days_since_job > 14
+        grouped_billing_history[customer_key].append({'job_date': row[4], 'total_cost': row[5], 'overdue': overdue})
 
     # Prepare response
     response = []
     for customer_key, bills in grouped_billing_history.items():
+        # sorted job_date
+        sorted_bills = sorted(bills, key=lambda x: datetime.strptime(str(x['job_date']), '%Y-%m-%d'))
         customer_data = {
             'family_name': customer_key[0],
             'first_name': customer_key[1],
             'phone': customer_key[2],
-            'bills': bills
+            'email': customer_key[3],
+            'bills': sorted_bills
         }
         response.append(customer_data)
 
-    return jsonify(response)
+    return render_template("billsHistory.html", history_data=response)
 
+
+@app.post('/complete_job')
+def complete_job():
+    job_id = int(request.form.get('job_id'))
+    # calculate total cost
+    # get all parts and services
+    service_query_sql = '''select s.service_id,cost,qty from job_service js  left join
+                            job j on js.job_id = j.job_id left join service s on js.service_id = s.service_id
+                            where j.job_id  = {}'''.format(job_id)
+    part_query_sql = '''select p.part_id,cost,qty from job_part jp  left join
+                            job j on jp.job_id = j.job_id left join part p on jp.part_id = p.part_id
+                            where j.job_id = {}'''.format(job_id)
+    connect = getCursor()
+    connect.execute(service_query_sql)
+    services = connect.fetchall()
+
+    connect.execute(part_query_sql)
+    parts = connect.fetchall()
+
+    total_cost = Decimal(0)
+    # through the parts list and calculate the total cost
+    for service in services:
+        service_cost = service[1] * Decimal(service[2])
+        total_cost += service_cost
+
+    # through the parts list and calculate the total cost
+    for part in parts:
+        part_cost = part[1] * Decimal(part[2])
+        total_cost += part_cost
+
+    updateSql = '''update job set completed = 1 ,total_cost = %s where job_id = %s'''
+    connect.execute(updateSql, (total_cost, job_id))
+    return redirect(url_for('currentjobs'))
+
+@app.route('/admin_page')
+def admin_page():
+    return render_template('base.html')
 
 if __name__ == '__main__':
     app.run(port=8111, host="127.0.0.1", debug=True)

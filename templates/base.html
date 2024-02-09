@@ -12,10 +12,12 @@
 <nav>
     <h1>Selwyn Panel Beaters</h1>
     <ul>
-        <li><a href="{{ url_for('home') }}">Current Jobs</a></li>
-        <li><a href="{{ url_for('get_customers') }}">Customer List</a></li>
-        <li><a href="{{url_for('get_services')}}">Service List</a></li>
-        <li><a href="{{url_for('get_parts')}}">Part List</a></li>
+<!--        <li><a href="{{ url_for('home') }}">Current Jobs</a></li>-->
+        <li><a href="{{ url_for('get_customers') }}">Customer List & Add Customer</a></li>
+        <li><a href="{{url_for('get_services')}}">Service List & Add Service</a></li>
+        <li><a href="{{url_for('get_parts')}}">Part List & Add Part</a></li>
+        <li><a href="{{url_for('unpaid_jobs')}}">Unpaid bills & Pay Bills</a></li>
+        <li><a href="{{url_for('billing_history')}}">Billing History & Overdue Bills</a></li>
     </ul>
 </nav>
 <section class="content">
@@ -52,6 +54,7 @@
     }, false)
   })
 })()
+
 
 </script>
 </body>

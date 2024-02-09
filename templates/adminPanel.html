@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Page</title>
+    <title>{% block title %}Admin Panel{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
@@ -17,16 +17,7 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav">
                 <li class="nav-item">
-                    <a class="nav-link" href="#customer">Customer</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#part">Part</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#service">Service</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#part">Part</a>
+                    <a class="nav-link" href="/customers">Customer</a>
                 </li>
                 <!-- Add more navigation items here -->
             </ul>
@@ -35,15 +26,8 @@
 </nav>
 
 <div class="container mt-5">
-    <h1 id="customer">Customer</h1>
-    <!-- Add customer-related content here -->
-
-    <hr>
-
-    <h1 id="part">Part</h1>
-    <!-- Add part-related content here -->
-
-    <!-- Add more sections for other navigation items -->
+    {% block content %}
+    {% endblock %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>

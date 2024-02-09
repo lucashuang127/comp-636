@@ -4,19 +4,101 @@
 <h2>Curent Job List</h2>
 
 <!-- code to display list of jobs-->
-<table>
+<table class="table">
+    <thead>
     <tr>
         <th>Job ID</th>
-        <th>Customer ID</th>
+        <th>Customer Name</th>
         <th>Date</th>
+        <th>Action</th>
     </tr>
-    {% for job in job_list %}
-        <tr>
-            {% for field in job %}
-                <td>{{field}}</td>
-            {% endfor %}
-        </tr>
+    </thead>
+    <tbody>
+    {% for job in jobs %}
+    <tr>
+        <td>{{ job.job_id }}</td>
+        <td>{{ job.first_name }}</td>
+        <td>{{ job.family_name }}</td>
+        <td>{{ job.customer }}</td>
+        <td>{{ job.job_date }}</td>
+        <td>{{ job.completed }}</td>
+        <td>{{ job.service_name}}</td>
+        <td>{{ job.part_name}}</td>
+        <td>
+            <!-- Edit button trigger modal -->
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#editJobModal{{ job.job_id }}">
+                Edit
+            </button>
+            <!-- Modal -->
+            <div class="modal fade" id="editJobModal{{ job.job_id }}" tabindex="-1" aria-labelledby="editJobModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editJobModalLabel">Edit Job</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <!-- Edit job form -->
+                            <form action="/addJobServicePart" method="POST">
+                                <input type="hidden" name="job_id" value="{{ job.job_id }}">
+
+                                <div class="mb-3">
+                                    <label for="serviceSelect" class="form-label">service</label>
+                                    <select class="form-select" id="serviceSelect" name="service_id">
+                                        {% for service in services %}
+                                        <option value="{{ service.service_id }}">{{ service.service_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="serviceQuantity" class="form-label">service count</label>
+                                    <input type="number" class="form-control" id="serviceQuantity"
+                                           name="service_quantity" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="partSelect" class="form-label">part</label>
+                                    <select class="form-select" id="partSelect" name="part_id">
+                                        {% for part in parts %}
+                                        <option value="{{ part.part_id }}">{{ part.part_name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="partQuantity" class="form-label">part count</label>
+                                    <input type="number" class="form-control" id="partQuantity" name="part_quantity"
+                                           required>
+                                </div>
+                                <!-- Add more fields as needed -->
+                                <button type="submit" class="btn btn-primary">Submit</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </td>
+    </tr>
     {% endfor %}
+    </tbody>
 </table>
+
+
+<!--<table>-->
+<!--    <tr>-->
+<!--        <th>Job ID     </th>-->
+<!--        <th>first_name </th>-->
+<!--        <th>family_name</th>-->
+<!--        <th>Customer ID</th>-->
+<!--        <th>Date       </th>-->
+<!--    </tr>-->
+<!--    {% for job in job_list %}-->
+<!--        <tr>-->
+<!--            {% for field in job %}-->
+<!--                <td>{{field}}</td>-->
+<!--            {% endfor %}-->
+<!--        </tr>-->
+<!--    {% endfor %}-->
+<!--</table>-->
 
 {% endblock %}

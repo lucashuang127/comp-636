@@ -34,21 +34,117 @@ def home():
 
 @app.route("/currentjobs")
 def currentjobs():
+    page = request.args.get('page', 1, type=int)
+    per_page = 10
     connection = getCursor()
-    connection.execute("SELECT job_id,customer,job_date FROM job where completed=0;")
+    connection.execute('''SELECT job_id,first_name,family_name,customer,job_date,completed FROM job j join customer c on
+                           j.customer = c.customer_id where completed=0;''')
     jobList = connection.fetchall()
-    return render_template("currentjoblist.html", job_list=jobList)
+
+    format_job_list = []
+
+    for job_info in jobList:
+        # add part names of the job
+        connection.execute(
+            f'''select part_name from job_part jp  left join part p on jp.part_id = p.part_id where jp.job_id = {job_info[0]}''')
+        part_names = connection.fetchall()
+        part_name = ''
+        for part in part_names:
+            part_name += str(part[0]) + ','
+        # add service names of the job
+        connection.execute(
+            f'''select service_name from job_service js  left join service s on js.service_id = s.service_id where js.job_id = {job_info[0]}''')
+        service_names = connection.fetchall()
+        service_name = ''
+        for service in service_names:
+            service_name += str(service[0]) + ','
+        # format job item
+        job = {
+            'job_id': job_info[0],
+            'first_name': job_info[1],
+            'family_name': job_info[2],
+            'customer_id': job_info[3],
+            'job_date': job_info[4],
+            'completed': job_info[5],
+            'part_name': part_name,
+            'service_name': service_name
+        }
+        format_job_list.append(job)
+    return render_template("currentjoblist.html", jobs=format_job_list, services=get_service_list(),
+                           parts=get_part_list())
+
+
+@app.get("/services")
+def get_services():
+    result = get_service_list()
+    return render_template("service.html", services=result)
+
+
+@app.post("/addJobServicePart")
+def add_service_part():
+    data = request.form
+    service_id = data.get("service_id")
+    service_quantity = data.get("service_quantity")
+    part_id = data.get("part_id")
+    part_quantity = data.get("part_quantity")
+    job_id = data.get("job_id")
+    part_insert_sql = '''INSERT INTO job_part (job_id, part_id,qty) VALUES (%s, %s,%s)'''
+    service_insert_sql = '''INSERT INTO job_service (job_id, service_id,qty) VALUES (%s, %s,%s)'''
+    connect = getCursor()
+
+    connect.execute(part_insert_sql, (job_id, part_id, part_quantity))
+    connect.execute(service_insert_sql, (job_id, service_id, service_quantity))
+    return redirect(url_for('currentjobs'))
+
+
+def get_service_list():
+    connect = getCursor()
+    # build sql
+    sql = "SELECT service_id,service_name,cost FROM service"
+
+    # get results
+    connect.execute(sql)
+    services = connect.fetchall()
+
+    # format results
+    result = [{'service_id': row[0], 'service_name': row[1], 'cost': row[2]} for row in services]
+    return result
+
+
+@app.get("/parts")
+def get_parts():
+    result = get_part_list()
+    return render_template("part.html", parts=result)
+
+
+def get_part_list():
+    connect = getCursor()
+    # build sql
+    sql = "SELECT part_id,part_name,cost FROM part"
+
+    # get results
+    connect.execute(sql)
+    services = connect.fetchall()
+
+    # format results
+    result = [{'part_id': row[0], 'part_name': row[1], 'cost': row[2]} for row in services]
+    return result
+
+
+@app.get("/get_customer_form")
+def get_customer_form():
+    return render_template("addCustomer.html")
 
 
 @app.post("/addCustomer")
 def add_customer():
-    data = request.json
-    email = data['email']
-    first_name = data['first_name']
-    family_name = data['family_name']
-    phone = data['phone']
+    data = request.form
+    email = data.get('email')
+    first_name = data.get('firstName')
+    family_name = data.get('familyName')
+    phone = data.get('phone')
 
-    if not email or not first_name or not family_name or not phone:
+    if not email or not family_name or not phone:
         return jsonify({'error': 'Missing required fields'}), 400
 
     # insert into db
@@ -60,14 +156,14 @@ def add_customer():
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Email already exists'}), 400
 
-    return redirect(url_for('customer_list'))
+    return redirect(url_for('get_customers'))
 
 
 @app.post("/addPart")
 def add_part():
-    data = request.json
-    part_name = data['part_name']
-    cost = data['cost']
+    data = request.form
+    part_name = data.get('partName')
+    cost = data.get('cost')
 
     # validate params
     if not part_name or not cost:
@@ -85,14 +181,14 @@ def add_part():
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Part already exists'}), 400
 
-    return jsonify({'success': True}), 200
+    return redirect(url_for('get_parts'))
 
 
 @app.post('/addService')
 def add_service():
-    data = request.json
-    service_name = data['service_name']
-    cost = data['cost']
+    data = request.form
+    service_name = data.get('serviceName')
+    cost = data.get('cost')
 
     # validate params
     if not service_name or not cost:
@@ -111,7 +207,7 @@ def add_service():
     except sqlite3.IntegrityError:
         return jsonify({'error': 'Service already exists'}), 400
 
-    return jsonify({'success': True}), 200
+    return redirect(url_for('get_services'))
 
 
 @app.get('/customers')
@@ -122,7 +218,7 @@ def get_customers():
     connect = getCursor()
     # build sql
     sql = "SELECT * FROM customer"
-    orderBy = "order by family_name,first_name"
+    orderBy = " order by family_name,first_name"
     if name:
         sql += " WHERE first_name LIKE %s OR family_name LIKE %s"
         query_str = f"%{name}%"
@@ -137,7 +233,7 @@ def get_customers():
 
     # format results
     result = [{'id': row[0], 'first_name': row[1], 'family_name': row[2]} for row in customers]
-    return jsonify(result)
+    return render_template("customers.html", customers=result, services=get_service_list())
 
 
 @app.post('/addScheduleJob')
@@ -244,9 +340,51 @@ def pay_job():
     return jsonify({'message': 'Job payment successful'}), 200
 
 
+@app.route('/billing_history', methods=['GET'])
+def billing_history():
+    # Build the SQL query to gwet billing history
+    query = """
+    SELECT 
+        c.family_name,
+        c.first_name,
+        c.phone,
+        j.job_date,
+        j.total_cost
+    FROM 
+        job j
+    JOIN 
+        customer c ON j.customer = c.customer_id
+    ORDER BY 
+        c.family_name, c.first_name, j.job_date DESC
+    """
+
+    connect = getCursor()
+
+    # Execute the query to get billing history
+    connect.execute(query)
+    billing_history = connect.fetchall()
+
+    # Group billing history by customer
+    grouped_billing_history = {}
+    for row in billing_history:
+        customer_key = (row[0], row[1], row[2])  # Using family_name, first_name, phone as key
+        if customer_key not in grouped_billing_history:
+            grouped_billing_history[customer_key] = []
+        grouped_billing_history[customer_key].append({'job_date': row[3], 'total_cost': row[4]})
+
+    # Prepare response
+    response = []
+    for customer_key, bills in grouped_billing_history.items():
+        customer_data = {
+            'family_name': customer_key[0],
+            'first_name': customer_key[1],
+            'phone': customer_key[2],
+            'bills': bills
+        }
+        response.append(customer_data)
+
+    return jsonify(response)
+
+
 if __name__ == '__main__':
     app.run(port=8111, host="127.0.0.1", debug=True)
-
-
-
-

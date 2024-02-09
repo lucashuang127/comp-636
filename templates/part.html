@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 id="customer">Part List</h2>
+<!-- Add Part Button -->
+<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addPartModal">
+  Add Part
+</button>
+
+<!-- Modal -->
+<div class="modal fade" id="addPartModal" tabindex="-1" aria-labelledby="addPartModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addPartModalLabel">Add Part</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Part Form -->
+        <form id="addPartForm" class="needs-validation" novalidate action="/addPart" method="POST">
+          <div class="mb-3">
+            <label for="partName" class="form-label">Part Name</label>
+            <input type="text" class="form-control" id="partName" name="partName" required>
+            <div class="invalid-feedback">
+              Please enter a part name.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="cost" class="form-label">Cost</label>
+            <input type="number" class="form-control" id="cost" name="cost" required>
+            <div class="invalid-feedback">
+              Please enter the cost of the part.
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Part</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="searchResults">
+
+    <!-- Customer table -->
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Part Id</th>
+            <th scope="col">Part Name</th>
+            <th scope="col">Cost</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for part in parts %}
+        <tr>
+            <td>{{ part.part_id }}</td>
+            <td>{{ part.part_name }}</td>
+            <td>{{ part.cost }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

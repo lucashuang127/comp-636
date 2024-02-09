@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block content %}
+<h2 id="customer">Service List</h2>
+<!-- Add Service Button -->
+<button type="button" class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+    Add Service
+</button>
+
+<div class="modal fade" id="addServiceModal" tabindex="-1" aria-labelledby="addServiceModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addServiceModalLabel">Add Service</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Service Form -->
+        <form id="addServiceForm" class="needs-validation" novalidate action="/addService" method="POST">
+          <div class="mb-3">
+            <label for="serviceName" class="form-label">Service Name</label>
+            <input type="text" class="form-control" id="serviceName" name="serviceName" required>
+            <div class="invalid-feedback">
+              Please enter a service name.
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="cost" class="form-label">Cost</label>
+            <input type="number" class="form-control" id="cost" name="cost" required>
+            <div class="invalid-feedback">
+              Please enter the cost of the service.
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Add Service</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="searchResults">
+
+    <!-- Customer table -->
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Service Id</th>
+            <th scope="col">Service Name</th>
+            <th scope="col">Cost</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for service in services %}
+        <tr>
+            <td>{{ service.service_id }}</td>
+            <td>{{ service.service_name }}</td>
+            <td>{{ service.cost }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

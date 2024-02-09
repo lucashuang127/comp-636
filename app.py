@@ -131,9 +131,7 @@ def get_part_list():
     return result
 
 
-@app.get("/get_customer_form")
-def get_customer_form():
-    return render_template("addCustomer.html")
+
 
 
 @app.post("/addCustomer")

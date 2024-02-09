@@ -8,8 +8,12 @@
     <thead>
     <tr>
         <th>Job ID</th>
-        <th>Customer Name</th>
+        <th>First Name</th>
+        <th>Family Name</th>
+        <th>Customer Id</th>
         <th>Date</th>
+        <th>Service Name</th>
+        <th>Part Name</th>
         <th>Action</th>
     </tr>
     </thead>
@@ -19,11 +23,11 @@
         <td>{{ job.job_id }}</td>
         <td>{{ job.first_name }}</td>
         <td>{{ job.family_name }}</td>
-        <td>{{ job.customer }}</td>
+        <td>{{ job.customer_id }}</td>
         <td>{{ job.job_date }}</td>
-        <td>{{ job.completed }}</td>
         <td>{{ job.service_name}}</td>
         <td>{{ job.part_name}}</td>
+<!--        <td>{{ job.completed }}</td>-->
         <td>
             <!-- Edit button trigger modal -->
             <button type="button" class="btn btn-primary" data-bs-toggle="modal"

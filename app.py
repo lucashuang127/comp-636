@@ -234,10 +234,10 @@ def get_customers():
 
 @app.post('/addScheduleJob')
 def schedule_job():
-    data = request.json
+    data = request.form
     #
-    customer = data['customerId']
-    date_str = data['date']
+    customer = data.get('customer_id')
+    date_str = data.get('job_date')
 
     # validate params
     if not customer or not date_str:
@@ -257,7 +257,7 @@ def schedule_job():
     # insert into db
     connect.execute('INSERT INTO job (customer, job_date) VALUES (%s, %s)', (customer, date_str))
 
-    return jsonify({'success': True}), 200
+    return redirect(url_for('unpaid_jobs'))
 
 
 @app.route('/unpaid_jobs', methods=['GET'])
@@ -307,8 +307,14 @@ def unpaid_jobs():
 
     # Calculate the total number of pages
     total_pages = math.ceil(total_count / page_size)
+
+    sql = "SELECT customer_id,first_name,family_name FROM customer order by family_name,first_name"
+    connect.execute(sql)
+    customers = connect.fetchall()
+    result = [{'customer_id': row[0], 'first_name': row[1], 'family_name': row[2]} for
+              row in customers]
     return render_template("unpaidBills.html", unpaid_jobs=unpaid_jobs_list, total_count=total_count,
-                           total_pages=total_pages, page=page)
+                           total_pages=total_pages, page=page, customers=result, today=datetime.today())
 
 
 @app.route('/pay_job', methods=['POST'])
@@ -424,9 +430,11 @@ def complete_job():
     connect.execute(updateSql, (total_cost, job_id))
     return redirect(url_for('currentjobs'))
 
+
 @app.route('/admin_page')
 def admin_page():
     return render_template('base.html')
+
 
 if __name__ == '__main__':
     app.run(port=8111, host="127.0.0.1", debug=True)

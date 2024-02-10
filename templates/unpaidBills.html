@@ -3,6 +3,9 @@
 {% block content %}
 <h2>Unpaid bills & Pay Bills</h2>
 
+<!-- Add Job button -->
+<button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addJobModal">Add Job</button>
+
 <!-- Search form -->
 <form action="/unpaid_jobs" method="GET" class="mb-3">
     <div class="input-group">
@@ -44,6 +47,36 @@
     {% endfor %}
     </tbody>
 </table>
+
+<!-- Add Job Modal -->
+<div class="modal fade" id="addJobModal" tabindex="-1" aria-labelledby="addJobModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addJobModalLabel">Add Job</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Add job form -->
+                <form action="/addScheduleJob" method="POST">
+                    <div class="mb-3">
+                        <label for="customerSelect" class="form-label">Select Customer</label>
+                        <select class="form-select" id="customerSelect" name="customer_id">
+                            {% for customer in customers %}
+                            <option value="{{ customer.customer_id }}">{{ customer.first_name }} {{ customer.family_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                     <div class="mb-3">
+                        <label for="jobDate" class="form-label">Select Job Date</label>
+                        <input type="date" class="form-control" id="jobDate" name="job_date" min="{{ today }}" lang="en">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Job</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 <!-- Pagination -->
 <nav aria-label="Page navigation">
